@@ -1,0 +1,45 @@
+#DATA_DIR = "c:/dropbox/proj/ankioll/data"
+#DATA_DIR = "\\Dropbox\\proj\\ankioll\\data\\"
+DATA_DIR = "./data/"
+class Question
+  def initialize(@str: String); end
+end
+
+class Oll
+  def initialize(@id: Int, @name: String, @questions: Array<Question>); end
+
+  def self.load -> Array<Oll>
+    let questions = File.read("#{DATA_DIR}questions.csv").unwrap.lines.map{|l|
+      let ss = l.split(",")
+      Pair<Int, String>.new(ss[0].to_i, ss[1])
+    }
+
+    File.read("#{DATA_DIR}olls.csv").unwrap.lines.map{|l|
+      let ss = l.split(",")
+      let id = ss[0].to_i
+      let name = ss[1]
+      let qs = questions.select{|q| q.fst == id}.map{|a| Question.new(a.snd)}
+      Oll.new(id, name, qs)
+    }
+  end
+
+  def inspect -> String
+    "#<Oll #{@id} #{@name} x#{@questions.length}>"
+  end
+end
+
+let olls = Oll.load
+loop do
+  let oll = olls.sample
+  puts "Try this: #{oll.questions.sample.str}"
+  print "succeeded?[y/n]> "
+  if gets.unwrap().chars[0] == "y"
+    puts ""
+    puts "ok!"
+  else
+    puts ""
+    puts "Answer:"
+    p oll
+  end
+  puts ""
+end
